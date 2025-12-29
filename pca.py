@@ -82,7 +82,7 @@ class DataLoader:
             preload=True
         )
         self.epochs = epochs
-        self.y = events[:, 2]
+        self.y = epochs.events[:, 2]
         print("Epochs data shape:", epochs.get_data().shape)
         fig = epochs.plot(n_epochs=5, show=True)
         fig.set_size_inches(18, 18)
@@ -128,7 +128,8 @@ class DataLoader:
 def main():
     # model = PCA(n_components=5)
     # x_new = model.fit_transform(x)
-    model = DataLoader("/home/gkrusta/tpv/S002R04.edf")
+    # model = DataLoader("/home/gkrusta/tpv/S002R04.edf")
+    model = DataLoader("/home/gkrusta/physionet.org/files/eegmmidb/1.0.0/S005/S005R07.edf")
     # model = DataLoader("/sgoinfre/students/gkrusta/tpv/S002R04.edf")
     # demo: compute FFT and PSD 
     x = model.mark_bandpower()
