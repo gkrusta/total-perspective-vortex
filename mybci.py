@@ -3,7 +3,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.metrics import classification_report
-from sklearn.decomposition import PCA
+# from sklearn.decomposition import PCA
+from pca import PCA
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
@@ -16,7 +17,7 @@ def plot_label_distribution(features, labels):
     colored by the 3 labels to visualize class separation.
     """
     # Reduce dimensionality to 2D using PCA
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=6)
     features_2d = pca.fit_transform(features)
 
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -74,7 +75,9 @@ def main():
     print("Classification report:", classification_report(y_test, y_pred))
 
     # Plot the label distribution
-    plot_label_distribution(features, labels)
+    # plot_label_distribution(features, labels)
+    print(np.sum(pipeline.named_steps['pca'].explained_variance_ratio))
+
 
 
 if __name__ == "__main__":
