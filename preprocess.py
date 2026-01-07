@@ -4,6 +4,9 @@ import matplotlib.image as mpimg
 import numpy as np
 from sklearn.decomposition import PCA
 import mne
+from visualize import compute_spectrum
+
+
 # ensure images directory exists
 os.makedirs("images", exist_ok=True)
 
@@ -59,6 +62,7 @@ class DataLoader:
 
         # apply band pass filter
         self.filtered = raw.copy()
+        compute_spectrum(self, channel=20, plot=True)
         self.filtered.filter(l_freq=1, h_freq=40)
         self.filtered.notch_filter(freqs=60)
         self.filtered.set_eeg_reference('average')
@@ -82,6 +86,7 @@ class DataLoader:
             preload=True
         )
         self.epochs = epochs
+        print("Epochs info:", epochs.info)
         self.y = epochs.events[:, 2]
         print("Epochs data shape:", epochs.get_data().shape)
         fig = epochs.plot(n_epochs=5, show=True)
@@ -135,6 +140,7 @@ def main():
 
     # demo: compute FFT and PSD 
     x = model.mark_bandpower()
+    print("Extracted features shape:", x.shape)
     y = model.y
     np.save("data/X_train.npy", x)
     np.save("data/y_train.npy", y)

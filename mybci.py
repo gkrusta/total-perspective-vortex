@@ -76,7 +76,7 @@ def main():
 
     # Plot the label distribution
     # plot_label_distribution(features, labels)
-    print(np.sum(pipeline.named_steps['pca'].explained_variance_ratio))
+    print("variance ratio: ", np.sum(pipeline.named_steps['pca'].explained_variance_ratio))
 
 
 
