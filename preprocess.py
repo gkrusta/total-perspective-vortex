@@ -10,13 +10,7 @@ from visualize import compute_spectrum
 # ensure images directory exists
 os.makedirs("images", exist_ok=True)
 
-bands = {
-    "delta": (1, 4),
-    "theta": (4, 8),
-    "alpha": (8, 13),
-    "beta":  (13, 30),
-}
-
+USEFULL_CHANNELS = ['Cz', 'FCz', 'CPz', 'C3', 'C4', 'FC3', 'FC4', 'CP3', 'CP4']
 
 class DataLoader:
     def __init__(self, file_path):
@@ -63,7 +57,7 @@ class DataLoader:
         # apply band pass filter
         self.filtered = raw.copy()
         compute_spectrum(self, channel=20, plot=True)
-        self.filtered.filter(l_freq=1, h_freq=40)
+        self.filtered.filter(l_freq=8, h_freq=40)
         self.filtered.notch_filter(freqs=60)
         self.filtered.set_eeg_reference('average')
         # print("Filtered data shape:", self.filtered.get_data().shape)
@@ -108,24 +102,18 @@ class DataLoader:
         data = self.epochs.get_data()
         n_epochs, n_channels, n_times = data.shape
         features = []
-
         for epoch in data:
             psd, freqs = mne.time_frequency.psd_array_welch(
                 epoch,
                 sfreq=self.sampling_rate,
                 fmin=1,
-                fmax=40,
+                fmax=8,
                 n_fft=n_times,
                 window='hann',
             )
-
-            epoch_features = []
-            for fmin, fmax in bands.values():
-                idx = np.logical_and(freqs >= fmin, freqs <= fmax)
-                band_power = psd[:, idx].mean(axis=1)
-                epoch_features.extend(band_power)
-
-            features.append(epoch_features)
+            features.append(psd.flatten())
+            print("PSD shape:", psd.shape)
+            print("PSD:", psd)
 
         return np.array(features)
 
