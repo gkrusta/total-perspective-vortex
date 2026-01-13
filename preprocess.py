@@ -98,7 +98,7 @@ class DataLoader:
         # plt.show()
 
 
-    def mark_bandpower(self):
+    def compute_frequency_domain(self):
         data = self.epochs.get_data()
         n_epochs, n_channels, n_times = data.shape
         features = []
@@ -106,12 +106,12 @@ class DataLoader:
             psd, freqs = mne.time_frequency.psd_array_welch(
                 epoch,
                 sfreq=self.sampling_rate,
-                fmin=1,
-                fmax=8,
+                fmin=8,
+                fmax=40,
                 n_fft=n_times,
                 window='hann',
             )
-            features.append(psd.flatten())
+            features.append(psd)
             print("PSD shape:", psd.shape)
             print("PSD:", psd)
 
@@ -126,8 +126,8 @@ def main():
     # model = DataLoader("/sgoinfre/students/gkrusta/tpv/S002R04.edf")
     model = DataLoader("/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S006/S006R06.edf")
 
-    # demo: compute FFT and PSD 
-    x = model.mark_bandpower()
+    # compute FFT and PSD 
+    x = model.compute_frequency_domain()
     print("Extracted features shape:", x.shape)
     y = model.y
     np.save("data/X_train.npy", x)

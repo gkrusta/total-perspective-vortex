@@ -3,45 +3,76 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.metrics import classification_report
+from sklearn.model_selection import cross_val_score
 # from sklearn.decomposition import PCA
 from pca import PCA
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
+from preprocess import DataLoader
 # from mne.decoding import CSP
 
 
-def plot_label_distribution(features, labels):
-    """
-    Creates a 2D scatter plot of the features reduced to 2D using PCA,
-    colored by the 3 labels to visualize class separation.
-    """
-    # Reduce dimensionality to 2D using PCA
-    pca = PCA(n_components=6)
-    features_2d = pca.fit_transform(features)
+class ClassifierBCI:
+    def __init__(self, subject=None, run=None, task=None):
+        if subject and run and task:
+            self.subject = subject.zfill(3)
+            self.run = run.zfill(2)
+            self.data = DataLoader("/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{self.subject}/S{self.subject}R{self.run}.edf")
+            features = np.load("data/X_train.npy")
+            labels = np.load("data/y_train.npy")
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+                features,
+                labels,
+                test_size=0.2,
+                random_state=42,
+                stratify=labels
+            )
+            if task == "train":
+                self.train(self.X_train, self.y_train)
+            elif task == "predict":
+                self.predict(self.X_test)
+        else:
+            experi
 
-    fig, ax = plt.subplots(figsize=(10, 8))
-    colors = ['red', 'blue', 'green']  # For labels 1, 2, 3
-    label_names = {1: 'Label 1 (Rest)', 2: 'Label 2 (Left)', 3: 'Label 3 (Right)'}
-    
-    for label in np.unique(labels):
-        if label == 0:
-            continue  # Skip label 0 if it exists
-        mask = labels == label
-        ax.scatter(features_2d[mask, 0], features_2d[mask, 1], 
-                   c=colors[label-1], label=label_names.get(label, f'Label {label}'), 
-                   alpha=0.7, s=50, edgecolors='k', linewidth=0.5)
-    
-    ax.set_xlabel(f'PCA Component 1 ({pca.explained_variance_ratio_[0]:.1%} variance)', fontsize=12)
-    ax.set_ylabel(f'PCA Component 2 ({pca.explained_variance_ratio_[1]:.1%} variance)', fontsize=12)
-    ax.set_title('2D PCA Projection of Features by Class', fontsize=14, fontweight='bold')
-    ax.legend(fontsize=11, loc='best')
-    ax.grid(True, alpha=0.3)
 
-    plt.tight_layout()
-    plt.savefig('images/pca_projection_2d.png', dpi=100, bbox_inches='tight')
-    print("✓ Saved: images/pca_projection_2d.png")
-    plt.show()
+    def train(self, X_train, y_train):
+        self.pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('pca', PCA(n_components=10)),
+            ('lda', LDA())
+        ])
+        self.pipeline.fit(X_train, y_train)
+        train_score= self.pipeline.score(X_train, y_train)
+        print("Train score:", train_score)
+        # Flatten epochs/features to 2D for sklearn (n_samples, n_features)
+        n_samples = features.shape[0]
+        X = features.reshape(n_samples, -1)
+        cv = min(5, n_samples)
+        if cv < 2:
+            cv = 2
+        print(f"Running cross_val_score with cv={cv} on flattened features (shape {X.shape})")
+        simple_pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('pca', PCA(n_components=10)),
+            ('lda', LDA())
+        ])
+        scores = cross_val_score(simple_pipeline, X, labels, cv=cv, scoring='accuracy', n_jobs=-1)
+        print(f"Cross-validation accuracy: {scores.mean():.3f} ± {scores.std():.3f} (scores: {scores})")
+
+
+    def predict(self, X):
+        return self.pipeline.predict(X)
+
+
+    def score(self, X, y):
+        return self.pipeline.score(X, y)
+    
+    def experiment(self)
+        ...
+    
+
+    
 
 
 def main():
@@ -49,27 +80,36 @@ def main():
     parser.add_argument("subject", type=str, help="Path to the subject's EEG data file.")
     parser.add_argument("run", type=str, help="One of the 14 runs.")
     parser.add_argument("task", type=str, choices=["train", "predict"], nargs='?', help="Train or predict.")
-    
+    args = parser.parse_args()
+
     features = np.load("data/X_train.npy")
     labels = np.load("data/y_train.npy")
     
+    if args.task and args.subject and args.run:
+        print(f"Subject: {args.subject}, Run: {args.run}, Task: {args.task}")
+        mybci = ClassifierBCI(subject=args.subject, run=args.run, task=args.task)
+    if args == None:
+        print("Running experiment with default settings.")
+        mybci = ClassifierBCI()
+    else:
+        print("Missing arguments. Please provide subject, run, and task or no arguments at all.")
+        return
+
+
+    # proceed with a train/test split on the flattened data
     X_train, X_test, y_train, y_test = train_test_split(
-        features,
+        X,
         labels,
         test_size=0.2,
         random_state=42,
+        stratify=labels
     )
+    if args.task == "predict":
+        print("Prediction mode not implemented yet.")
+        return
+    else:
+        print("Training mode.")
 
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=10)),
-        ('lda', LDA())
-    ])
-
-    pipeline.fit(X_train, y_train)
-
-    train_score = pipeline.score(X_train, y_train)
-    print("Train score:", train_score)
 
     y_pred = pipeline.predict(X_test)
     print("Classification report:", classification_report(y_test, y_pred))
