@@ -33,7 +33,7 @@ class ClassifierBCI:
             elif task == "predict":
                 self.predict(self.X_test)
         else:
-            experi
+            experiment()
 
 
     def train(self, X_train, y_train):
