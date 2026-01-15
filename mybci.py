@@ -16,11 +16,10 @@ from preprocess import DataLoader
 class ClassifierBCI:
     def __init__(self, subject=None, run=None, task=None):
         if subject and run and task:
-            self.subject = subject.zfill(3)
-            self.run = run.zfill(2)
-            self.data = DataLoader("/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{self.subject}/S{self.subject}R{self.run}.edf")
-            features = np.load("data/X_train.npy")
-            labels = np.load("data/y_train.npy")
+            model = DataLoader(subject, run)
+            # maybe remove np save from save features function
+            features = model.features
+            labels = model.labels
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
                 features,
                 labels,
@@ -80,6 +79,7 @@ def main():
     parser.add_argument("subject", type=str, help="Path to the subject's EEG data file.")
     parser.add_argument("run", type=str, help="One of the 14 runs.")
     parser.add_argument("task", type=str, choices=["train", "predict"], nargs='?', help="Train or predict.")
+    parser.add_argument("model", type=str, nargs='?', help="Type of model to train. Default is LDA.", default="LDA")
     args = parser.parse_args()
 
     features = np.load("data/X_train.npy")

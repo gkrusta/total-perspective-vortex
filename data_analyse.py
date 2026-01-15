@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 from preprocess import DataLoader
+from utils import open_subject
 
 
 os.makedirs("images", exist_ok=True)
@@ -58,14 +59,6 @@ def compute_spectrum(self, channel: int = 0, n_fft: int | None = None, plot: boo
     return freqs, psd
 
 
-def visualize(model):
-    plt.plot(model.time, model.data)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.title('EEG Signal - Channel 0')
-    plt.show()
-
-
 def visualize_epochs(model, n_epochs):
     """
     Plots the epochs of the EEG data.
@@ -82,9 +75,17 @@ def plot_eeg(eeg_data, name):
     Plot EEG data before and after filtering.
     """
     fig = eeg_data.plot(n_channels=10, duration=8, scalings='auto', show=False)
-    plt.savefig("images/{name}_plt.png")
-    plt.close(fig)
+    plt.savefig(f"images/{name}_plt.png")
   
+
+def visualize_montage(raw):
+    """
+    Visualize the EEG montage (64 sensor layout).
+    """
+    fig = raw.plot_sensors(show_names=True, show=False)
+    plt.savefig("images/montage_plt.png")
+    plt.close(fig)
+
 
 def main():
     # model = DataLoader("/home/gkrusta/tpv/S002R04.edf")
@@ -92,15 +93,15 @@ def main():
     # model = DataLoader("/sgoinfre/students/gkrusta/tpv/S002R04.edf")
     parser = argparse.ArgumentParser(description="Explore EEG dataset, visulize it raw, then filter and parse it"
                                                   "and visulize it again for comparison.")
-    parser.add_argument("subject", type=str, help="Path to the subject's EEG data file.")
-    parser.add_argument("run", type=str, help="One of the 14 runs.")
+    parser.add_argument("subject", type=int, choices=range(1, 110), help="Path to the subject's EEG data file. ")
+    parser.add_argument("run", type=int, choices=range(1, 15), help="One of the 14 runs.")
+    parser.add_argument("--inspect", "-i", action="store_true", help="Whether to inspect the raw data plot upon loading.")
     args = parser.parse_args()
-    model = DataLoader(args.subject, args.run)
-    plot_eeg(model.data, "raw")
+    model = DataLoader(args.subject, args.run, inspect=args.inspect)
+    plot_eeg(model.raw, "raw")
     plot_eeg(model.filtered, "filtered")
-    visualize(model)
     visualize_epochs(model, n_epochs=5)
-
+    visualize_montage(model.raw)
 
 if __name__ == "__main__":
     main()
