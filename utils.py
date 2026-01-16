@@ -42,7 +42,9 @@ def open_subject(subject, run):
     try:
         subject_id = str(subject).zfill(3)
         run_id = str(run).zfill(2)
-        file_path = f"/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
+        # file_path = f"/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
+        file_path = f"/home/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
+
         print("Opening subject:", file_path)
         raw = mne.io.read_raw_edf(file_path, preload=True)
         data = raw.get_data()
@@ -63,12 +65,10 @@ def describe_data(model):
     print("n_channels:", model.n_channels)
     print("channel names:", model.channel_names)
     print("sampling rate:", model.sampling_rate)
-    print("time shape:", model.time)
-    print("time shape 2:", model.raw.times)
+    print("time marks:", model.time)
     print("data shape:", model.data.shape)
-    print("RAW ANOTAION: ", model.raw.annotations)
-    print("Annotations:", model.raw.annotations)
 
+    print("Annotations:", model.raw.annotations)
     for annot in model.raw.annotations:
         print(f"  Onset: {annot['onset']}, Duration: {annot['duration']:.2f}s, Description: {annot['description']}")
     
