@@ -90,7 +90,7 @@ def visualize_montage(raw):
 def main():
     # model = DataLoader("/home/gkrusta/tpv/S002R04.edf")
     # model = DataLoader("/home/gkrusta/physionet.org/files/eegmmidb/1.0.0/S005/S005R07.edf")
-    # model = DataLoader("/sgoinfre/students/gkrusta/tpv/S002R04.edf")
+    # model = DataLoader("/re/students/gkrusta/tpv/S002R04.edf")
     parser = argparse.ArgumentParser(description="Explore EEG dataset, visulize it raw, then filter and parse it"
                                                   "and visulize it again for comparison.")
     parser.add_argument("subject", type=int, choices=range(1, 110), help="Path to the subject's EEG data file. ")

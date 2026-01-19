@@ -1,6 +1,6 @@
 import numpy as np
 import mne
-from utils import open_subject, describe_data
+from utils import open_subject, describe_data, USEFULL_CHANNELS
 
 class DataLoader:
     def __init__(self, subject, run, inspect=False):

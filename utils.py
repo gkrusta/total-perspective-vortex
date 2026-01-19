@@ -4,29 +4,35 @@ import numpy as np
 
 
 EXPERIMENTS = {
-    'both_hands_vs_feet': {
-        'experments': [5, 9, 13],
-        'events': {'T1': 1, 'T2': 2}
+    # 'both_hands_vs_feet'
+    0: {
+        'runs': [5, 9, 13],
+        'events': {'T1': 2, 'T2': 3}
     },
-    'imagine_both_hands_vs_feet': {
-        'experments': [6, 10, 14],
-        'events': {'T1': 1, 'T2': 2}
+    # 'imagine_both_hands_vs_feet'
+    1: {
+        'runs': [6, 10, 14],
+        'events': {'T1': 2, 'T2': 3}
     },
-    'left_hand_vs_right_hand': {
-        'experments': [3, 7, 11],
-        'events': {'T1': 1, 'T2': 2}
+    # 'left_hand_vs_right_hand'
+    2: {
+        'runs': [3, 7, 11],
+        'events': {'T1': 2, 'T2': 3}
     },
-    'imagine_left_hand_vs_right_hand': {
-        'experments': [4, 8, 12],
-        'events': {'T1': 1, 'T2': 2}
+    # 'imagine_left_hand_vs_right_hand'
+    3: {
+        'runs': [4, 8, 12],
+        'events': {'T1': 2, 'T2': 3}
     },
-    'rest_vs_both_hands': {
-        'experments': [5, 9, 13],
-        'events': {'T0': 0, 'T1': 1}
+    # 'rest_vs_both_hands'
+    4: {
+        'runs': [5, 9, 13],
+        'events': {'T0': 1, 'T1': 2}
     },
-    'rest_vs_imagine_both_hands': {
-        'experments': [6, 10, 14],
-        'events': {'T0': 0, 'T1': 1}
+    # 'rest_vs_imagine_both_hands'
+    5: {
+        'runs': [6, 10, 14],
+        'events': {'T0': 1, 'T1': 2}
     },
 }
 
@@ -42,8 +48,8 @@ def open_subject(subject, run):
     try:
         subject_id = str(subject).zfill(3)
         run_id = str(run).zfill(2)
-        # file_path = f"/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
-        file_path = f"/home/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
+        file_path = f"/sgoinfre/students/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
+        # file_path = f"/home/gkrusta/physionet.org/files/eegmmidb/1.0.0/S{subject_id}/S{subject_id}R{run_id}.edf"
 
         print("Opening subject:", file_path)
         raw = mne.io.read_raw_edf(file_path, preload=True)
@@ -76,3 +82,13 @@ def describe_data(model):
     print("Labels:", model.labels.shape)
     print("Epochs data shape:", model.epochs.get_data().shape)
     print("Epochs info:", model.epochs.info)
+
+
+def find_events(model,experiment_dict):
+    """
+    Returns a mask to filter events for t1, t2 or t3 according to
+    experiment.
+    """
+    events = experiment_dict['events']
+    mask = (model.labels == list(events.values())[0]) | (model.labels == list(events.values())[1])
+    return mask
